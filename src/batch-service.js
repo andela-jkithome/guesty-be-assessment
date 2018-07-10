@@ -51,7 +51,16 @@ const batch = (req,res) => {
 
   performRequests(requests)
     .then(({success, failed}) => {
-      res.status(200).send([...success, ...failed]);
+      if(failed.length) {
+        //Retry the failed requests once for each batch
+        let retrials = failed.map(fail => {
+          return fail.request
+        })
+        performRequests(retrials)
+          .then(({ success: retrySuccess, failed: retryFailed }) => {
+            res.status(200).send([...success, ...retrySuccess, ... retryFailed]);
+          })
+      }
     })
     .catch(err => res.status(500).send(err.message));
 }
