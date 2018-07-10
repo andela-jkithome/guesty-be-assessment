@@ -1,0 +1,25 @@
+{
+  "name": "guesty-be-assessment",
+  "version": "1.0.0",
+  "description": "'Batch editing service'",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andela-jkithome/guesty-be-assessment.git"
+  },
+  "author": "Jeremy Kithome",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/andela-jkithome/guesty-be-assessment/issues"
+  },
+  "homepage": "https://github.com/andela-jkithome/guesty-be-assessment#readme",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3",
+    "morgan": "^1.9.0"
+  }
+}
