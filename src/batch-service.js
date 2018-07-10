@@ -1,5 +1,13 @@
 const axios = require('axios');
 
+/**
+ * Replace the params in a path with correct values.
+ *
+ * @param {string} url URL with path params to replace
+ * @param {object} params Object containing params param: paramValue
+ * @returns {string} newUrl with params replaced with correct values.
+ */
+
 const formUrl = (url, params ) => {
   let newUrl = url;
   let keys = Object.keys(params);
@@ -13,6 +21,15 @@ const formUrl = (url, params ) => {
   return newUrl;
 }
 
+/**
+ * Construct an array of axios-ready configurations
+ *
+ * @param {object} request containing URL and verb.
+ * @param {object[]} payload Array of payload objects. Each object contains params
+ *                           and details/body for the request
+ * @returns {object[]} Array of axios request objects
+ */
+
 const processRequests = ({ url, verb }, payload) => {
   //Create axios request object for each payload item
   return payload.map(({params, body}) => ({
@@ -21,6 +38,13 @@ const processRequests = ({ url, verb }, payload) => {
     data: { ...body },
   }));
 }
+
+/**
+ * Execute an array of batch requests.
+ *
+ * @param {object[]} requests axios request objects
+ * @returns {Promise} resolves with successful and failed requests
+ */
 
 const performRequests = (requests) => {
   return new Promise(res => {
@@ -45,6 +69,12 @@ const performRequests = (requests) => {
   });
 }
 
+/**
+ * Make batch requests 
+
+ * @returns {array} returns results or error message
+ */
+
 const batch = (req,res) => {
   const batchLimit = 5;
   const batchTime = 10000;
@@ -61,14 +91,13 @@ const batch = (req,res) => {
       start = new Date().getTime();
       performRequests(queue)
         .then(({success, failed}) => {
-          console.log(success, failed);
-          //console.log(success.length, failed.length);
           results.push(...success);
           if(failed.length) {
             let retrials = failed.map(fail => {
               return fail.request
             });
             toRetry.push(...retrials);
+            //Check if there are requests to be processed
             if(requests.length || toRetry.length) {
               let time = batchTime - (new Date().getTime() - start);
               setTimeout(() => {
@@ -78,6 +107,7 @@ const batch = (req,res) => {
               limit();
             }
           } else {
+            //Check if there are requests to be processed
             if(requests.length || toRetry.length) {
               let time = batchTime - (new Date().getTime() - start);
               setTimeout(() => {
