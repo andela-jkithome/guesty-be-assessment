@@ -38,7 +38,7 @@ const performRequests = (requests) => {
           })
           .catch(error => {
             // console.log(error);
-              failed.push({request, status: error.response.status });
+            failed.push({request, status: error.response.status });
           }),
       ),
     ).then(() => res({ success, failed }));
@@ -46,35 +46,74 @@ const performRequests = (requests) => {
 }
 
 const batch = (req,res) => {
-  const batchLimit = 5
+  const batchLimit = 5;
+  const batchTime = 10000;
   const { request, payload } = req.body;
   const requests = processRequests(request, payload);
   let results = [];
+  let toRetry = [];
+  let start;
 
   (limit = () => {
     let queue = requests.splice(-batchLimit);
     if(queue.length) {
+      console.log('First call!!')
+      start = new Date().getTime();
       performRequests(queue)
         .then(({success, failed}) => {
+          console.log(success, failed);
           //console.log(success.length, failed.length);
           results.push(...success);
           if(failed.length) {
-            //Retry the failed requests once for each batch
             let retrials = failed.map(fail => {
               return fail.request
-            })
-            performRequests(retrials)
-              .then(({ success: retrySuccess, failed: retryFailed }) => {
-                //console.log(retrySuccess.length, retryFailed.length);
-                results.push(...retrySuccess, ...retryFailed);
+            });
+            toRetry.push(...retrials);
+            if(requests.length || toRetry.length) {
+              let time = batchTime - (new Date().getTime() - start);
+              setTimeout(() => {
                 limit();
-              })
+              }, time);
+            } else {
+              limit();
+            }
+          } else {
+            if(requests.length || toRetry.length) {
+              let time = batchTime - (new Date().getTime() - start);
+              setTimeout(() => {
+                limit();
+              }, time);
+            } else {
+              limit();
+            }
           }
         })
         .catch(err => res.status(500).send(err.message));
 
     } else {
-      res.status(200).send(results)
+      if(toRetry.length) {
+        console.log('Retry called!!')
+        let retrials = toRetry.splice(-limit);
+        console.log('RETRIALS', retrials);
+        start = new Date().getTime();
+        performRequests(retrials)
+          .then(({ success: retrySuccess, failed:retryFailed }) => {
+            // Since this is the retry no need to retry again
+            let time = batchTime - (new Date().getTime() - start);
+            results.push(...retrySuccess, ...retryFailed);
+            if(toRetry.length) {
+              setTimeout(() => {
+                limit();
+              }, time);
+            } else {
+              limit();
+            }
+          })
+          .catch(error => res.status(500).send(error.message));
+      } else {
+        console.log('Send results!')
+        res.status(200).send(results);
+      }
     }
   })();
 
