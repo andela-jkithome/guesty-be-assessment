@@ -69,29 +69,29 @@ The response structure is as follows:
 ```json
 [ 
   { 
-    status: 200,
-    response: { 
-      id: 'ja2S-hs81-ksn3-iQI9',
-      name: 'Jon Snow',
-      email: 'jon@wall.com',
-      age: 21 
+    "status": 200,
+    "response": {
+      "id": "ja2S-hs81-ksn3-iQI9",
+      "name": "Jon Snow",
+      "email": "jon@wall.com",
+      "age": 21
     } 
   },
   { 
-    status: 200,
-    response: { 
+    "status": 200,
+    "response": {
       id: 'ja2S-hs81-ksn3-iQI9',
-      name: 'Jon Snow',
-      email: 'jon@wall.com',
-      age: 21 
+      "name": "Jon Snow",
+      "email": "jon@wall.com",
+      "age": 21
     } 
   }, 
   { 
-    status: 503 
-    request: { 
-      verb: 'PUT',
-      url: 'https://guesty-user-service.herokuapp.com/user/29',
-      data: [Object] 
+    "status": 503
+    "request": {
+      "verb": "PUT",
+      "url": "https://guesty-user-service.herokuapp.com/user/29",
+      "data": "[Object]"
     },
   } 
 ]
