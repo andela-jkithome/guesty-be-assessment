@@ -80,14 +80,14 @@ The response structure is as follows:
   { 
     "status": 200,
     "response": {
-      id: 'ja2S-hs81-ksn3-iQI9',
+      id: "ja2S-hs81-ksn3-iQI9",
       "name": "Jon Snow",
       "email": "jon@wall.com",
       "age": 21
     } 
   }, 
   { 
-    "status": 503
+    "status": 503,
     "request": {
       "verb": "PUT",
       "url": "https://guesty-user-service.herokuapp.com/user/29",
