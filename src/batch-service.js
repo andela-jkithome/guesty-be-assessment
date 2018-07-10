@@ -46,23 +46,39 @@ const performRequests = (requests) => {
 }
 
 const batch = (req,res) => {
+  const batchLimit = 5
   const { request, payload } = req.body;
   const requests = processRequests(request, payload);
+  let results = [];
 
-  performRequests(requests)
-    .then(({success, failed}) => {
-      if(failed.length) {
-        //Retry the failed requests once for each batch
-        let retrials = failed.map(fail => {
-          return fail.request
+  (limit = () => {
+    let queue = requests.splice(-batchLimit);
+    if(queue.length) {
+      performRequests(queue)
+        .then(({success, failed}) => {
+          //console.log(success.length, failed.length);
+          results.push(...success);
+          if(failed.length) {
+            //Retry the failed requests once for each batch
+            let retrials = failed.map(fail => {
+              return fail.request
+            })
+            performRequests(retrials)
+              .then(({ success: retrySuccess, failed: retryFailed }) => {
+                //console.log(retrySuccess.length, retryFailed.length);
+                results.push(...retrySuccess, ...retryFailed);
+                limit();
+              })
+          }
         })
-        performRequests(retrials)
-          .then(({ success: retrySuccess, failed: retryFailed }) => {
-            res.status(200).send([...success, ...retrySuccess, ... retryFailed]);
-          })
-      }
-    })
-    .catch(err => res.status(500).send(err.message));
+        .catch(err => res.status(500).send(err.message));
+
+    } else {
+      res.status(200).send(results)
+    }
+  })();
+
 }
+
 
 module.exports = batch;
